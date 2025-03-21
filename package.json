@@ -1,0 +1,24 @@
+{
+  "name": "gamenet.js",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "SmirkStick",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@clipchamp/json-delta": "^1.1.0",
+    "express": "^4.21.2",
+    "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.1.9",
+    "@types/express": "^5.0.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.8.2"
+  }
+}
