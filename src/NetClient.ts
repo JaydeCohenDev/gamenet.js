@@ -15,6 +15,7 @@ export default class NetClient {
 
     public constructor(serverAddress: "http://127.0.0.1:3037") {
 
+
         const io: Socket<IGameServerToClientEvents, IGameClientToServerEvents>
             = IO(`${serverAddress}/game`);
 
