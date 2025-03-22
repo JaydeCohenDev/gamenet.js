@@ -1,8 +1,13 @@
 import { IS_NET_CLIENT, IS_NET_SERVER } from "./GameNet";
 
-export const rpcCallbacks = {
-    onClientRPC: (objId: string, methodName: string, args: any[]) => void {},
-    onServerRPC: (objId: string, methodName: string, args: any[]) => void {}
+interface IRpcCallbacks {
+    onClientRPC?: (objId: string, methodName: string, args: any[]) => void;
+    onServerRPC?: (objId: string, methodName: string, args: any[]) => void;
+}
+
+export const rpcCallbacks: IRpcCallbacks = {
+    onClientRPC: undefined,
+    onServerRPC: undefined
 };
 
 export function toServer() {
@@ -11,9 +16,11 @@ export function toServer() {
 
         descriptor.value = function (...args: any[]) {
             if (IS_NET_CLIENT) {
+                console.log('RPC runnign on client');
                 rpcCallbacks.onServerRPC?.(this._id, methodName, args);
             } else {
-                return oldMethod.apply(this, ...args);
+                console.log('RPC runnign on server');
+                return oldMethod.apply(this, args);
             }
         }
     }
@@ -27,8 +34,8 @@ export function toClients() {
             if (IS_NET_SERVER) {
                 rpcCallbacks.onClientRPC?.(this._id, methodName, args);
             } else {
-                return oldMethod.apply(this, ...args);
+                return oldMethod.apply(this, args);
             }
         }
     }
-}
+} 

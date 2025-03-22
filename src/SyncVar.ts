@@ -18,6 +18,8 @@ export default function syncvar() {
             Reflect.defineMetadata('syncvars', [propertyName], target);
         }
 
+        const initialValue = target[propertyName];
+
         Reflect.deleteProperty(target, propertyName);
 
         Reflect.defineProperty(target, propertyName, {
@@ -27,7 +29,17 @@ export default function syncvar() {
             set: function (value: any) {
                 const oldVal = this[`_${propertyName}`];
                 this[`_${propertyName}`] = value;
-                syncVarCallbacks.onSyncVarChange?.(this, propertyName, oldVal, value);
+
+                const metadataKey = `_initialized_${propertyName}`;
+
+                const isInitialized = Reflect.hasMetadata(metadataKey, this);
+
+                if (isInitialized) {
+                    syncVarCallbacks.onSyncVarChange?.(this, propertyName, oldVal, value);
+                } else {
+                    Reflect.defineMetadata(metadataKey, true, this);
+                }
+
             }
         });
 

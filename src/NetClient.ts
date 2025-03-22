@@ -1,43 +1,66 @@
-import { Socket } from 'socket.io-client';
+import { io as IO, Socket } from 'socket.io-client';
 import { IGameClientToServerEvents, IGameServerToClientEvents } from './GameEvents';
 import NetWorld from './NetWorld';
 import { GetNetObjType } from './NetObjectRegistry';
 import { rpcCallbacks } from './RPC';
+import { SetNetEnvironment } from './GameNet';
 
 export default class NetClient {
+
+    public onConnected: (() => void)[] = [];
+    public onDisconnected: (() => void)[] = [];
 
     protected _world: NetWorld;
     public get World(): NetWorld { return this._world; }
 
-    public constructor(io: Socket<IGameServerToClientEvents, IGameClientToServerEvents>) {
+    public constructor(serverAddress: "http://127.0.0.1:3037") {
+
+        const io: Socket<IGameServerToClientEvents, IGameClientToServerEvents>
+            = IO(`${serverAddress}/game`);
+
+        SetNetEnvironment('client');
+
         this._world = new NetWorld();
 
         rpcCallbacks.onServerRPC = (objId, methodName, args) => {
+            console.log('sending server RPC');
             io.emit("emitServerRPC", objId, methodName, args);
         }
 
         io.on("connect", () => {
+            this._world = new NetWorld();
             console.log("Connected to server!");
+
+            this.onConnected.forEach(callback => callback());
         });
 
         io.on("disconnect", () => {
+            this._world = new NetWorld();
             console.log("Disconnected from server!");
+
+            this.onDisconnected.forEach(callback => callback());
         });
 
         io.on("objSpawned", (id: string, typeName: string, data: any) => {
+            console.log(`objSpawned id:${id} typeName:${typeName}`, data);
             const netObj = GetNetObjType(typeName);
-            this._world.Spawn(netObj, id).Deserialize(data);
+            const obj = this._world.Spawn(netObj, id);
+            obj.Deserialize(data);
+            this._world.onObjectSpawned.forEach(callback => callback(obj));
         });
 
         io.on("objDestroyed", (id: string) => {
+            console.log(`objDestroyed id:${id}`);
             this._world.NetObjects[id].Destroy();
         });
 
         io.on("objSync", (id: string, data: any) => {
-            this._world.NetObjects[id].Deserialize(data);
+            console.log(`objSync id:${id}`, data);
+            this._world.NetObjects[id]?.Deserialize(data);
         });
 
         io.on("emitClientRPC", (objId: string, methodName: string, args: any[]) => {
+            console.log(`emitClientRPC objId:${objId} methodName:${methodName}`, args);
             const obj = this._world.NetObjects[objId];
             if (!obj) return;
 
