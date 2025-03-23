@@ -1,5 +1,6 @@
 import { v4 } from "uuid";
 import NetWorld from "./NetWorld";
+import { INetRoom } from "./NetRoom";
 
 export default class NetObj {
     public onDestroyed?: () => void;
@@ -9,6 +10,8 @@ export default class NetObj {
 
     protected _world: NetWorld;
     public get World(): NetWorld { return this._world; }
+
+    public Rooms: INetRoom[] = [];
 
     constructor(world: NetWorld, id?: string) {
         this._id = id ? id : v4();

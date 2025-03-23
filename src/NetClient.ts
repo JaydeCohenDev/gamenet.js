@@ -4,6 +4,7 @@ import NetWorld from './NetWorld';
 import { GetNetObjType } from './NetObjectRegistry';
 import { rpcCallbacks } from './RPC';
 import { SetNetEnvironment } from './GameNet';
+import { IGameNetConfig } from './Config';
 
 export default class NetClient {
 
@@ -13,11 +14,12 @@ export default class NetClient {
     protected _world: NetWorld;
     public get World(): NetWorld { return this._world; }
 
-    public constructor(serverAddress: "http://127.0.0.1:3037") {
+    public constructor(serverAddress: "http://127.0.0.1:3037", config?: IGameNetConfig) {
 
+        const namespace = config?.namespace ?? '/game';
 
         const io: Socket<IGameServerToClientEvents, IGameClientToServerEvents>
-            = IO(`${serverAddress}/game`);
+            = IO(`${serverAddress}${namespace}`);
 
         SetNetEnvironment('client');
 
@@ -43,6 +45,7 @@ export default class NetClient {
         });
 
         io.on("objSpawned", (id: string, typeName: string, data: any) => {
+            console.log('asdfasdfasdfasdfasdf');
             console.log(`objSpawned id:${id} typeName:${typeName}`, data);
             const netObj = GetNetObjType(typeName);
             const obj = this._world.Spawn(netObj, id);
