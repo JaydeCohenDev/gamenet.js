@@ -14,7 +14,7 @@ export default class NetClient {
     protected _world: NetWorld;
     public get World(): NetWorld { return this._world; }
 
-    public constructor(serverAddress: "http://127.0.0.1:3037", config?: IGameNetConfig) {
+    public constructor(serverAddress: string, config?: IGameNetConfig) {
 
         const namespace = config?.namespace ?? '/game';
 
