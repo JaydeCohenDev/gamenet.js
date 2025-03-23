@@ -1,7 +1,9 @@
 import syncvar from "./SyncVar";
 import { toServer, toClients } from "./RPC";
-import { Namespace } from "socket.io";
+import { BroadcastOperator, Namespace } from "socket.io";
 import { IGameClientToServerEvents, IGameInterServerEvents, IGameServerToClientEvents, IGameSocketData } from "./GameEvents";
+import NetObj from "./NetObj";
+import { DecorateAcknowledgementsWithMultipleResponses } from "socket.io/dist/typed-events";
 
 export let IS_NET_SERVER = false;
 export let IS_NET_CLIENT = false;
@@ -24,5 +26,15 @@ export type GameNetNamespace = Namespace<
     IGameServerToClientEvents,
     IGameInterServerEvents,
     IGameSocketData>;
+
+// {
+
+//     public targetRelevant(obj: NetObj): BroadcastOperator<DecorateAcknowledgementsWithMultipleResponses<IGameServerToClientEvents>, IGameSocketData> | GameNetNamespace {
+//         if (obj.Rooms.length === 0) return this;
+//         else {
+//             return this.to(obj.Rooms[0].name);
+//         }
+//     }
+// }
 
 export { syncvar, toServer, toClients };

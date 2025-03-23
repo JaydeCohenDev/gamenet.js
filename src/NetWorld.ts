@@ -1,4 +1,5 @@
 import NetObj from "./NetObj";
+import NetRoom from "./NetRoom";
 
 export default class NetWorld {
 
@@ -7,6 +8,17 @@ export default class NetWorld {
 
     protected _netObjects: { [key: string]: NetObj } = {};
     public get NetObjects(): { [key: string]: NetObj } { return this._netObjects; }
+
+    protected _rooms: { [key: string]: NetRoom } = {};
+    public get Rooms(): { [key: string]: NetRoom } { return this.Rooms; }
+
+    public AddRoom(name: string): NetRoom {
+        if (this._rooms[name])
+            throw (`unable to create room ${name}. Room already exits!`);
+
+        this._rooms[name] = new NetRoom(name, this);
+        return this._rooms[name];
+    }
 
     public Spawn<T extends NetObj>(type: { new(world: NetWorld, id?: string): T; }, id?: string): T {
         let spawnedObj = new type(this, id);

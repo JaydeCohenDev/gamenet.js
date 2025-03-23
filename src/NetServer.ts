@@ -21,7 +21,7 @@ export default class NetServer {
         SetNetEnvironment('server');
 
         const namespace = config?.namespace ?? '/game';
-        this._gameSocket = io.of(namespace);
+        this._gameSocket = io.of(namespace) as GameNetNamespace;
 
         this._defaultWorld = new NetWorld();
 
