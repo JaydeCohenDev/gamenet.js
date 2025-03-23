@@ -11,6 +11,12 @@ export const rpcCallbacks: IRpcCallbacks = {
     onServerRPC: undefined
 };
 
+/**
+ * A decorator function that modifies a method to handle remote procedure calls (RPC).
+ * When the method is called, it checks if the code is running on a client or server.
+ * If running on a client, it triggers the `onServerRPC` callback with the method details.
+ * If running on a server, it executes the original method.
+ */
 export function toServer() {
     return function (classPrototype: any, methodName: any, descriptor: any) {
         const oldMethod = descriptor.value;
@@ -27,6 +33,16 @@ export function toServer() {
     }
 }
 
+/**
+ * A decorator function that modifies a method to handle RPC (Remote Procedure Call) logic.
+ * 
+ * When applied to a method, it intercepts the method call and performs different actions
+ * based on whether the code is running on a server or a client.
+ * 
+ * - On the server (`IS_NET_SERVER` is true), it triggers the `onClientRPC` callback with the
+ *   current instance, method name, and arguments.
+ * - On the client (`IS_NET_SERVER` is false), it executes the original method with the provided arguments.
+ */
 export function toClients() {
     return function (classPrototype: any, methodName: any, descriptor: any) {
         const oldMethod = descriptor.value;

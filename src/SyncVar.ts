@@ -6,6 +6,21 @@ export const syncVarCallbacks = {
     onSyncVarChange: (obj: any, propName: string, oldValue: any, newValue: any) => { }
 };
 
+/**
+ * A decorator function to synchronize a class property with metadata and handle property changes.
+ *
+ * This function is used to decorate a class property and manage its synchronization state.
+ * It logs the class name and property name, maintains a list of synchronized variables,
+ * and sets up getter and setter methods to handle property changes.
+ *
+ * @example
+ * ```typescript
+ * class MyClass {
+ *     @syncvar()
+ *     myProperty: string;
+ * }
+ * ```
+ */
 export default function syncvar() {
     return (target: any, propertyName: any) => {
         const className: string = Reflect.get(target, 'constructor').name;

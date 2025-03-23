@@ -1,18 +1,30 @@
 import { Socket } from "socket.io";
 import { GameNetNamespace } from "../GameNet";
 import NetWorld from "../NetWorld";
-import { isRelevantFor, sendObjSpawnEvent, sendObjToClient } from "./ObjectEvents";
+import { isRelevantFor, sendObjToClient } from "./ObjectEvents";
 
+/**
+ * Manages connections to the server
+ */
 export default class ConnectionHandler {
     protected _gameSocket: GameNetNamespace;
-    protected _defaultWorld: NetWorld;
+    protected world: NetWorld;
 
     protected _connectedClients: Socket[] = [];
+
+    /**
+     * A list of all currently connected clients.
+     */
     public get ConnectedClients(): Socket[] { return this._connectedClients; }
 
-    constructor(gameSocket: GameNetNamespace, defaultWorld: NetWorld) {
+    /**
+     * 
+     * @param gameSocket the server namespace socket that handles the connection.
+     * @param world the world that contains all the NetObjects 
+     */
+    constructor(gameSocket: GameNetNamespace, world: NetWorld) {
         this._gameSocket = gameSocket;
-        this._defaultWorld = defaultWorld;
+        this.world = world;
 
         this._gameSocket.on("connection", (socket) => {
             console.log(`A new client connected with ID: ${socket.id}`);
@@ -28,9 +40,9 @@ export default class ConnectionHandler {
 
             socket.on("emitServerRPC", (objId: string, methodName: string, args: any[]) => {
                 console.trace();
-                const objName = this._defaultWorld.NetObjects[objId].constructor.name;
+                const objName = this.world.NetObjects[objId].constructor.name;
                 console.log(`Server RPC: ${objName}.${methodName}(${args.join(", ")})`);
-                const obj = this._defaultWorld.NetObjects[objId];
+                const obj = this.world.NetObjects[objId];
                 if (!obj) return;
 
                 (obj as any)[methodName](...args);
@@ -39,12 +51,20 @@ export default class ConnectionHandler {
 
     }
 
+    /**
+     * Sends the current world state to the target client. Only objects
+     * that are relevant to them will be sent.
+     * 
+     * Todo: Don't send objects they already know about? (room join)
+     * 
+     * @param socket client to send to
+     */
     public SendCurrentState(socket: Socket) {
 
         console.log('sending current state to client');
-        for (const id in this._defaultWorld.NetObjects) {
+        for (const id in this.world.NetObjects) {
 
-            const obj = this._defaultWorld.NetObjects[id];
+            const obj = this.world.NetObjects[id];
 
             if (isRelevantFor(obj, socket)) {
                 console.log(`sending obj with id: ${obj.Id}`);
