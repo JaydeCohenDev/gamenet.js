@@ -94,6 +94,7 @@ export default class NetObj {
      */
     public Serialize(): {} {
         const syncVarNames = Reflect.getOwnMetadata('syncvars', Reflect.getPrototypeOf(this)!);
+        if(syncVarNames === undefined) return {};
         return {
             vars: syncVarNames.map((name: string) => {
                 return {
