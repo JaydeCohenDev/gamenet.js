@@ -1,15 +1,15 @@
 import { GameNetNamespace } from "../GameNet";
 import { rpcCallbacks } from "../RPC";
+import { targetRelevant } from "./ObjectEvents";
 
 export default class RPCHandler {
 
     public constructor(protected _gameSocket: GameNetNamespace) {
 
-        rpcCallbacks.onClientRPC = (objId, methodName, args) => {
+        rpcCallbacks.onClientRPC = (obj, methodName, args) => {
 
-            console.log(`Client RPC: ${objId}.${methodName}(${args.join(", ")})`);
-            this._gameSocket.volatile.emit("emitClientRPC", objId, methodName, args);
-
+            console.log(`Client RPC: ${obj.Id}.${methodName}(${args.join(", ")})`);
+            targetRelevant(this._gameSocket, obj).emit("emitClientRPC", obj.Id, methodName, args);
         }
 
     }

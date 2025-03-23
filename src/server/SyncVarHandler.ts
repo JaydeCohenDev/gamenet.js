@@ -1,6 +1,7 @@
 import { GameNetNamespace } from "../GameNet";
 import NetObj from "../NetObj";
 import { syncVarCallbacks } from "../SyncVar";
+import { targetRelevant } from "./ObjectEvents";
 
 export default class SyncVarHandler {
 
@@ -10,7 +11,7 @@ export default class SyncVarHandler {
 
             console.log(`${obj.constructor.name}:${propName} changed from '${oldValue}' to '${newValue}'`);
             const data = (obj as NetObj).Serialize();
-            this._gameSocket.emit("objSync", obj.Id, data);
+            targetRelevant(this._gameSocket, obj).emit("objSync", obj.Id, data);
 
         }
     }

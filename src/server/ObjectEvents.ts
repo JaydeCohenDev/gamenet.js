@@ -9,9 +9,10 @@ export function sendObjSpawnEvent(obj: NetObj, gameSocket: GameNetNamespace) {
 }
 
 export function sendObjToClient(obj: NetObj, client: Socket) {
+    if (!isRelevantFor(obj, client)) return;
+
     const data = obj.Serialize();
-    if (obj.Rooms.length === 0)
-        client.emit("objSpawned", obj.Id, obj.constructor.name, data);
+    client.emit("objSpawned", obj.Id, obj.constructor.name, data);
 }
 
 export function targetRelevant(gameSocket: GameNetNamespace, obj: NetObj) {
@@ -20,4 +21,19 @@ export function targetRelevant(gameSocket: GameNetNamespace, obj: NetObj) {
     else {
         return gameSocket.to(obj.Rooms.map((room => room.Name)));
     }
+}
+
+export function isRelevantFor(obj: NetObj, client: Socket) {
+
+    if (obj.Rooms.length === 0)
+        return true;
+
+    for (const room of obj.Rooms) {
+        if (client.rooms.has(room.Name)) {
+            return true;
+        }
+    }
+
+    return false;
+
 }

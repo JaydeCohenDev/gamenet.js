@@ -1,8 +1,9 @@
 import { IS_NET_CLIENT, IS_NET_SERVER } from "./GameNet";
+import NetObj from "./NetObj";
 
 interface IRpcCallbacks {
-    onClientRPC?: (objId: string, methodName: string, args: any[]) => void;
-    onServerRPC?: (objId: string, methodName: string, args: any[]) => void;
+    onClientRPC?: (obj: NetObj, methodName: string, args: any[]) => void;
+    onServerRPC?: (obj: NetObj, methodName: string, args: any[]) => void;
 }
 
 export const rpcCallbacks: IRpcCallbacks = {
@@ -17,7 +18,7 @@ export function toServer() {
         descriptor.value = function (...args: any[]) {
             if (IS_NET_CLIENT) {
                 console.log('RPC runnign on client');
-                rpcCallbacks.onServerRPC?.(this._id, methodName, args);
+                rpcCallbacks.onServerRPC?.(this, methodName, args);
             } else {
                 console.log('RPC runnign on server');
                 return oldMethod.apply(this, args);
@@ -32,7 +33,7 @@ export function toClients() {
 
         descriptor.value = function (...args: any[]) {
             if (IS_NET_SERVER) {
-                rpcCallbacks.onClientRPC?.(this._id, methodName, args);
+                rpcCallbacks.onClientRPC?.(this, methodName, args);
             } else {
                 return oldMethod.apply(this, args);
             }

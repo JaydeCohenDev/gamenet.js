@@ -1,4 +1,4 @@
-import { Server as SocketIOServer } from 'socket.io';
+import { Socket, Server as SocketIOServer } from 'socket.io';
 import NetWorld from './NetWorld';
 import { syncVarCallbacks } from './SyncVar';
 import NetObj from './NetObj';
@@ -9,12 +9,15 @@ import { sendObjSpawnEvent } from './server/ObjectEvents';
 import SyncVarHandler from './server/SyncVarHandler';
 import RPCHandler from './server/RPCHandler';
 import { IGameNetConfig } from './Config';
+import NetRoom from './NetRoom';
 
 export default class NetServer {
 
     protected _defaultWorld: NetWorld;
     public get DefaultWorld(): NetWorld { return this._defaultWorld; }
     protected _gameSocket: GameNetNamespace;
+
+    protected _connectionHandler: ConnectionHandler;
 
     public constructor(io: SocketIOServer, config?: IGameNetConfig) {
 
@@ -25,7 +28,7 @@ export default class NetServer {
 
         this._defaultWorld = new NetWorld();
 
-        new ConnectionHandler(this._gameSocket, this._defaultWorld);
+        this._connectionHandler = new ConnectionHandler(this._gameSocket, this._defaultWorld);
         new SyncVarHandler(this._gameSocket)
         new RPCHandler(this._gameSocket);
 
@@ -34,6 +37,25 @@ export default class NetServer {
         this._defaultWorld.onObjectDestroyed.push((obj) => {
             this._gameSocket.volatile.emit("objDestroyed", obj.Id);
         });
+    }
+
+    public JoinNetRoom(socket: Socket, room: NetRoom) {
+        console.log(`${socket.id} joined room ${room.Name}`);
+        socket.join(room.Name);
+
+        // Send room data to client
+        this._connectionHandler.SendCurrentState(socket);
+    }
+
+    public LeaveNetRoom(socket: Socket, room: NetRoom) {
+        socket.leave(room.Name);
+        console.log(`${socket.id} left room ${room.Name}`);
+
+        // Clear room data on client
+    }
+
+    public GetConnectedClients(): Socket[] {
+        return this._connectionHandler.ConnectedClients;
     }
 
 }

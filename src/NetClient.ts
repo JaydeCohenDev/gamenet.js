@@ -25,9 +25,9 @@ export default class NetClient {
 
         this._world = new NetWorld();
 
-        rpcCallbacks.onServerRPC = (objId, methodName, args) => {
+        rpcCallbacks.onServerRPC = (obj, methodName, args) => {
             console.log('sending server RPC');
-            io.emit("emitServerRPC", objId, methodName, args);
+            io.emit("emitServerRPC", obj.Id, methodName, args);
         }
 
         io.on("connect", () => {

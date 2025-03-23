@@ -1,11 +1,14 @@
 import { Socket } from "socket.io";
 import { GameNetNamespace } from "../GameNet";
 import NetWorld from "../NetWorld";
-import { sendObjSpawnEvent, sendObjToClient } from "./ObjectEvents";
+import { isRelevantFor, sendObjSpawnEvent, sendObjToClient } from "./ObjectEvents";
 
 export default class ConnectionHandler {
     protected _gameSocket: GameNetNamespace;
     protected _defaultWorld: NetWorld;
+
+    protected _connectedClients: Socket[] = [];
+    public get ConnectedClients(): Socket[] { return this._connectedClients; }
 
     constructor(gameSocket: GameNetNamespace, defaultWorld: NetWorld) {
         this._gameSocket = gameSocket;
@@ -14,10 +17,13 @@ export default class ConnectionHandler {
         this._gameSocket.on("connection", (socket) => {
             console.log(`A new client connected with ID: ${socket.id}`);
 
-            this.sendCurrentState(socket);
+            this._connectedClients.push(socket);
+
+            this.SendCurrentState(socket);
 
             socket.on("disconnect", () => {
                 console.log(`client with ID: ${socket.id} disconnected`);
+                this._connectedClients.splice(this._connectedClients.indexOf(socket), 1);
             });
 
             socket.on("emitServerRPC", (objId: string, methodName: string, args: any[]) => {
@@ -33,12 +39,18 @@ export default class ConnectionHandler {
 
     }
 
-    protected sendCurrentState(socket: Socket) {
+    public SendCurrentState(socket: Socket) {
+
         console.log('sending current state to client');
         for (const id in this._defaultWorld.NetObjects) {
+
             const obj = this._defaultWorld.NetObjects[id];
-            console.log(`sending obj with id: ${id}`);
-            sendObjToClient(obj, socket);
+
+            if (isRelevantFor(obj, socket)) {
+                console.log(`sending obj with id: ${obj.Id}`);
+                sendObjToClient(obj, socket);
+            }
+
         }
     }
 }
