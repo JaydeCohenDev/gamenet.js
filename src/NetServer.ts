@@ -13,8 +13,8 @@ import NetRoom from './NetRoom';
 
 export default class NetServer {
 
-    protected _defaultWorld: NetWorld;
-    public get DefaultWorld(): NetWorld { return this._defaultWorld; }
+    protected _world: NetWorld;
+    public get World(): NetWorld { return this._world; }
     protected _gameSocket: GameNetNamespace;
 
     protected _connectionHandler: ConnectionHandler;
@@ -26,15 +26,15 @@ export default class NetServer {
         const namespace = config?.namespace ?? '/game';
         this._gameSocket = io.of(namespace) as GameNetNamespace;
 
-        this._defaultWorld = new NetWorld();
+        this._world = new NetWorld();
 
-        this._connectionHandler = new ConnectionHandler(this._gameSocket, this._defaultWorld);
+        this._connectionHandler = new ConnectionHandler(this._gameSocket, this._world);
         new SyncVarHandler(this._gameSocket)
         new RPCHandler(this._gameSocket);
 
-        this._defaultWorld.onObjectSpawned.push((obj) => sendObjSpawnEvent(obj, this._gameSocket));
+        this._world.onObjectSpawned.push((obj) => sendObjSpawnEvent(obj, this._gameSocket));
 
-        this._defaultWorld.onObjectDestroyed.push((obj) => {
+        this._world.onObjectDestroyed.push((obj) => {
             this._gameSocket.volatile.emit("objDestroyed", obj.Id);
         });
     }

@@ -14,7 +14,7 @@ io.on("connection", (socket) => {
 
 const gameServer = new NetServer(io);
 
-const testObj = gameServer.DefaultWorld.Spawn(TestNetObj);
+const testObj = gameServer.World.Spawn(TestNetObj);
 
 setTimeout(() => {
     testObj.myString = "testing 123";
