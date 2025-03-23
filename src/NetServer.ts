@@ -1,8 +1,5 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import NetWorld from './NetWorld';
-import { syncVarCallbacks } from './SyncVar';
-import NetObj from './NetObj';
-import { rpcCallbacks } from './RPC';
 import { GameNetNamespace, SetNetEnvironment } from './GameNet';
 import ConnectionHandler from './server/ConntectionHandler';
 import { sendObjSpawnEvent } from './server/ObjectEvents';
