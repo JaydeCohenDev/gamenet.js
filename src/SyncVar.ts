@@ -1,10 +1,18 @@
+/*
+ * Copyright Liquid Donkey Games Limited (c) 2025. All rights reserved.
+ */
 
 import 'reflect-metadata';
 import RegisterNetObj from './NetObjectRegistry';
 
 export const syncVarCallbacks = {
-    onSyncVarChange: (obj: any, propName: string, oldValue: any, newValue: any) => { }
+    onSyncVarChange: (obj: any, propName: string, oldValue: any, newValue: any) => {
+    }
 };
+
+export interface ISyncVarOptions {
+    OnSync?: string;
+}
 
 /**
  * A decorator function to synchronize a class property with metadata and handle property changes.
@@ -21,8 +29,9 @@ export const syncVarCallbacks = {
  * }
  * ```
  */
-export default function syncvar() {
+export default function syncvar(options?: ISyncVarOptions) {
     return (target: any, propertyName: any) => {
+        if (!target) return;
         const className: string = Reflect.get(target, 'constructor').name;
         console.log(`${className}:${propertyName}`);
 
@@ -51,13 +60,16 @@ export default function syncvar() {
 
                 if (isInitialized) {
                     syncVarCallbacks.onSyncVarChange?.(this, propertyName, oldVal, value);
+
+                    if (options?.OnSync)
+                        this[options.OnSync]?.(oldVal, value);
+
                 } else {
                     Reflect.defineMetadata(metadataKey, true, this);
                 }
 
             }
         });
-
 
 
         RegisterNetObj(target.constructor);
