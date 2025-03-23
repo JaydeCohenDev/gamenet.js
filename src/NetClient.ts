@@ -45,7 +45,13 @@ export default class NetClient {
         });
 
         io.on("objSpawned", (id: string, typeName: string, data: any) => {
-            console.log('asdfasdfasdfasdfasdf');
+
+            if (this._world.NetObjects[id]) {
+                console.log('Net object already spawned... deserializing instead of spawning.');
+                this._world.NetObjects[id].Deserialize(data);
+                return;
+            }
+
             console.log(`objSpawned id:${id} typeName:${typeName}`, data);
             const netObj = GetNetObjType(typeName);
             const obj = this._world.Spawn(netObj, id);
