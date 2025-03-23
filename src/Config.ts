@@ -1,3 +1,6 @@
+import {ManagerOptions, SocketOptions} from "socket.io-client";
+
 export interface IGameNetConfig {
-    namespace?: string
+    namespace?: string,
+    opts?: Partial<ManagerOptions & SocketOptions>
 }
